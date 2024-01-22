@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, Dispatch, SetStateAction } from 'react';
-import type { FileWithPath } from '@uploadthing/react';
 import { useDropzone } from '@uploadthing/react/hooks';
 import { generateClientDropzoneAccept } from 'uploadthing/client';
 
@@ -22,7 +21,7 @@ export function FileUploader({
   /* The `onDrop` function is a callback function that is called when files are dropped onto the dropzone
 component. It takes an array of `FileWithPath` objects as its parameter, which represents the files
 that were dropped. */
-  const onDrop = useCallback((acceptedFiles: FileWithPath[]) => {
+  const onDrop = useCallback((acceptedFiles: File[]) => {
     setFiles(acceptedFiles);
     onFieldChange(convertFileToUrl(acceptedFiles[0]));
   }, []);
