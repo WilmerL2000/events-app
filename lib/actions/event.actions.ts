@@ -142,3 +142,68 @@ export async function updateEvent({ userId, event, path }: UpdateEventParams) {
         handleError(error)
     }
 }
+
+/**
+ * The function `getRelatedEventsByCategory` retrieves related events based on a category and event ID,
+ * with optional pagination.
+ * @param {GetRelatedEventsByCategoryParams}  - - `categoryId`: The ID of the category for which
+ * related events are to be fetched.
+ * @returns an object with two properties: "data" and "totalPages". The "data" property contains an
+ * array of events, and the "totalPages" property contains the total number of pages based on the given
+ * limit.
+ */
+export async function getRelatedEventsByCategory({
+    categoryId,
+    eventId,
+    limit = 3,
+    page = 1,
+}: GetRelatedEventsByCategoryParams) {
+    try {
+        await connectToDatabase()
+
+        const skipAmount = (Number(page) - 1) * limit
+        const conditions = { $and: [{ category: categoryId }, { _id: { $ne: eventId } }] }
+
+        const eventsQuery = Event.find(conditions)
+            .sort({ createdAt: 'desc' })
+            .skip(skipAmount)
+            .limit(limit)
+
+        const events = await populateEvent(eventsQuery)
+        const eventsCount = await Event.countDocuments(conditions)
+
+        return { data: JSON.parse(JSON.stringify(events)), totalPages: Math.ceil(eventsCount / limit) }
+    } catch (error) {
+        handleError(error)
+    }
+}
+
+/**
+ * The function `getEventsByUser` retrieves events organized by a specific user, with pagination
+ * support.
+ * @param {GetEventsByUserParams}  - - `userId`: The ID of the user for whom we want to retrieve
+ * events.
+ * @returns an object with two properties: "data" and "totalPages". The "data" property contains an
+ * array of events, and the "totalPages" property contains the total number of pages based on the limit
+ * and the number of events.
+ */
+export async function getEventsByUser({ userId, limit = 6, page }: GetEventsByUserParams) {
+    try {
+        await connectToDatabase()
+
+        const conditions = { organizer: userId }
+        const skipAmount = (page - 1) * limit
+
+        const eventsQuery = Event.find(conditions)
+            .sort({ createdAt: 'desc' })
+            .skip(skipAmount)
+            .limit(limit)
+
+        const events = await populateEvent(eventsQuery)
+        const eventsCount = await Event.countDocuments(conditions)
+
+        return { data: JSON.parse(JSON.stringify(events)), totalPages: Math.ceil(eventsCount / limit) }
+    } catch (error) {
+        handleError(error)
+    }
+}

@@ -1,9 +1,13 @@
 import Image from 'next/image';
 
-import { getEventById } from '@/lib/actions/event.actions';
+import {
+  getEventById,
+  getRelatedEventsByCategory,
+} from '@/lib/actions/event.actions';
 import { SearchParamProps } from '@/types';
 import { formatDateTime } from '@/lib/utils';
 import Collection from '@/components/shared/Collection';
+import CheckoutButton from '@/components/shared/CheckoutButton';
 
 export default async function EventDetails({
   params: { id },
@@ -11,7 +15,11 @@ export default async function EventDetails({
 }: SearchParamProps) {
   const event = await getEventById(id);
 
-  const relatedEvents = '';
+  const relatedEvents = await getRelatedEventsByCategory({
+    categoryId: event.category._id,
+    eventId: event._id,
+    page: searchParams.page as string,
+  });
 
   return (
     <>
@@ -47,6 +55,8 @@ export default async function EventDetails({
                 </p>
               </div>
             </div>
+
+            <CheckoutButton event={event} />
 
             <div className="flex flex-col gap-5">
               <div className="flex gap-2 md:gap-3">
@@ -98,7 +108,7 @@ export default async function EventDetails({
         <h2 className="h2-bold">Related Events</h2>
 
         <Collection
-          data={[]}
+          data={relatedEvents?.data}
           emptyTitle="No Events Found"
           emptyStateSubtext="Come back later"
           collectionType="All_Events"
