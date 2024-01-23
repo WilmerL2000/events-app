@@ -29,7 +29,7 @@ import DatePicker from 'react-datepicker';
 
 import 'react-datepicker/dist/react-datepicker.css';
 import { useRouter } from 'next/navigation';
-import { createEvent } from '@/lib/actions/event.actions';
+import { createEvent, updateEvent } from '@/lib/actions/event.actions';
 
 type EventFormProps = {
   userId: string;
@@ -38,12 +38,18 @@ type EventFormProps = {
   eventId?: string;
 };
 
-export default function EventForm({ userId, type, event }: EventFormProps) {
+export default function EventForm({
+  userId,
+  type,
+  event,
+  eventId,
+}: EventFormProps) {
   const [files, setFiles] = useState<File[]>([]);
   const initialValues =
     event && type === 'Update'
       ? {
           ...event,
+          categoryId: event.category._id,
           startDateTime: new Date(event.startDateTime),
           endDateTime: new Date(event.endDateTime),
         }
@@ -58,12 +64,11 @@ export default function EventForm({ userId, type, event }: EventFormProps) {
   });
 
   /**
-   * The function onSubmit is an asynchronous function that handles form submission in a TypeScript React
-   * application, including uploading an image and creating a new event.
+   * The function handles form submission for creating or updating an event, including uploading an image
+   * if necessary.
    * @param values - The `values` parameter is an object that represents the form values submitted by the
    * user. It is inferred from the `eventFormSchema` schema.
-   * @returns If the condition `if (type === 'Create')` is true, then the function will return nothing
-   * (`undefined`). If the condition is false, the function will also return nothing (`undefined`).
+   * @returns The function does not explicitly return anything.
    */
   async function onSubmit(values: z.infer<typeof eventFormSchema>) {
     let uploadedImageUrl = values.imageUrl;
@@ -86,6 +91,27 @@ export default function EventForm({ userId, type, event }: EventFormProps) {
         if (newEvent) {
           form.reset();
           router.push(`/events/${newEvent._id}`);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    if (type === 'Update') {
+      if (!eventId) {
+        router.back();
+        return;
+      }
+
+      try {
+        const updatedEvent = await updateEvent({
+          userId,
+          event: { ...values, imageUrl: uploadedImageUrl, _id: eventId },
+          path: `/events/${eventId}`,
+        });
+        if (updatedEvent) {
+          form.reset();
+          router.push(`/events/${updatedEvent._id}`);
         }
       } catch (error) {
         console.log(error);

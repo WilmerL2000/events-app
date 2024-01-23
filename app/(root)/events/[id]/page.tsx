@@ -3,12 +3,15 @@ import Image from 'next/image';
 import { getEventById } from '@/lib/actions/event.actions';
 import { SearchParamProps } from '@/types';
 import { formatDateTime } from '@/lib/utils';
+import Collection from '@/components/shared/Collection';
 
 export default async function EventDetails({
   params: { id },
   searchParams,
 }: SearchParamProps) {
   const event = await getEventById(id);
+
+  const relatedEvents = '';
 
   return (
     <>
@@ -89,6 +92,20 @@ export default async function EventDetails({
             </div>
           </div>
         </div>
+      </section>
+
+      <section className="wrapper my-8 flex flex-col gap-8 md:gap-12">
+        <h2 className="h2-bold">Related Events</h2>
+
+        <Collection
+          data={[]}
+          emptyTitle="No Events Found"
+          emptyStateSubtext="Come back later"
+          collectionType="All_Events"
+          limit={3}
+          page={searchParams.page as string}
+          totalPages={1}
+        />
       </section>
     </>
   );
