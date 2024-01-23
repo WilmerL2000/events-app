@@ -114,7 +114,7 @@ export default async function EventDetails({
           collectionType="All_Events"
           limit={3}
           page={searchParams.page as string}
-          totalPages={1}
+          totalPages={relatedEvents?.totalPages}
         />
       </section>
     </>
