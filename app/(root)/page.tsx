@@ -1,4 +1,6 @@
+import CategoryFilter from '@/components/shared/CategoryFilter';
 import Collection from '@/components/shared/Collection';
+import Search from '@/components/shared/Search';
 import { Button } from '@/components/ui/button';
 import { getAllEvents } from '@/lib/actions/event.actions';
 import { SearchParamProps } from '@/types';
@@ -52,7 +54,10 @@ export default async function Home({ searchParams }: SearchParamProps) {
           Trust by <br /> Thousands of Events
         </h2>
 
-        <div className="flex w-full flex-col gap-5 md:flex-row"></div>
+        <div className="flex w-full flex-col gap-5 md:flex-row">
+          <Search />
+          <CategoryFilter />
+        </div>
 
         <Collection
           data={events?.data}

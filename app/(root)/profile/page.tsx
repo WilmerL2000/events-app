@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { getEventsByUser } from '@/lib/actions/event.actions';
 import { IOrder } from '@/lib/database/models/order.model';
 import { SearchParamProps } from '@/types';
+import { getOrdersByUser } from '@/lib/actions/order.actions';
 
 export default async function ProfilePage({ searchParams }: SearchParamProps) {
   const { sessionClaims } = auth();
@@ -14,9 +15,9 @@ export default async function ProfilePage({ searchParams }: SearchParamProps) {
   const ordersPage = Number(searchParams?.ordersPage) || 1;
   const eventsPage = Number(searchParams?.eventsPage) || 1;
 
-  // const orders = await getOrdersByUser({ userId, page: ordersPage})
+  const orders = await getOrdersByUser({ userId, page: ordersPage });
 
-  // const orderedEvents = orders?.data.map((order: IOrder) => order.event) || [];
+  const orderedEvents = orders?.data.map((order: IOrder) => order.event) || [];
   const organizedEvents = await getEventsByUser({ userId, page: eventsPage });
 
   return (
@@ -32,14 +33,14 @@ export default async function ProfilePage({ searchParams }: SearchParamProps) {
 
       <section className="wrapper my-8">
         <Collection
-          data={[]}
+          data={orderedEvents}
           emptyTitle="No event tickets purchased yet"
           emptyStateSubtext="No worries - plenty of exciting events to explore!"
           collectionType="My_Tickets"
           limit={3}
-          page={1}
+          page={ordersPage}
           urlParamName="ordersPage"
-          totalPages={1}
+          totalPages={orders?.totalPages}
         />
       </section>
 
@@ -59,9 +60,9 @@ export default async function ProfilePage({ searchParams }: SearchParamProps) {
           emptyStateSubtext="Go create some now"
           collectionType="Events_Organized"
           limit={3}
-          page={1}
+          page={eventsPage}
           urlParamName="eventsPage"
-          totalPages={1}
+          totalPages={organizedEvents?.totalPages}
         />
       </section>
     </>
